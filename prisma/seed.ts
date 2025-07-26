@@ -1,61 +1,79 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Rol } from '@prisma/client';
 import { hash } from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Crear roles
-  const adminRole = await prisma.role.upsert({
-    where: { name: 'ADMIN' },
-    update: {},
-    create: { name: 'ADMIN' },
-  });
-
-  const userRole = await prisma.role.upsert({
-    where: { name: 'USER' },
-    update: {},
-    create: { name: 'USER' },
-  });
-
   // Crear usuario administrador
   const hashedPassword = await hash('admin123', 10);
-  const adminUser = await prisma.user.upsert({
+
+  // Crear usuario administrador
+  await prisma.usuario.upsert({
     where: { email: 'admin@zapateria.com' },
     update: {},
     create: {
       email: 'admin@zapateria.com',
-      name: 'Administrador',
+      nombre: 'Administrador',
+      apellido: 'Sistema',
       password: hashedPassword,
-      roleId: adminRole.id,
+      rol: Rol.ADMIN,
+      telefono: '+541112345678',
+      direccion: 'Calle Falsa 123',
     },
   });
 
-  // Crear categorías de productos
-  const categories = await Promise.all([
-    prisma.category.upsert({
-      where: { name: 'Zapatos' },
-      update: {},
-      create: { name: 'Zapatos', description: 'Calzado para todo tipo de ocasión' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'Zapatillas' },
-      update: {},
-      create: { name: 'Zapatillas', description: 'Calzado deportivo y casual' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'Botas' },
-      update: {},
-      create: { name: 'Botas', description: 'Calzado de invierno y trabajo' },
-    }),
-  ]);
+  // Crear usuario de prueba
+  const testUser = await prisma.usuario.upsert({
+    where: { email: 'cliente@ejemplo.com' },
+    update: {},
+    create: {
+      email: 'cliente@ejemplo.com',
+      nombre: 'Cliente',
+      apellido: 'Ejemplo',
+      password: await hash('cliente123', 10),
+      rol: Rol.CLIENTE,
+      telefono: '+541198765432',
+      direccion: 'Avenida Siempreviva 742',
+    },
+  });
 
-  console.log('Seed completado con éxito!');
-  console.log({ adminUser, categories });
+  // Crear un pedido de ejemplo
+  const pedido = await prisma.pedido.create({
+    data: {
+      clienteId: testUser.id,
+      productos: [
+        { id: '1', nombre: 'Zapato de cuero', cantidad: 1, precio: 25000 },
+        { id: '2', nombre: 'Cordon de repuesto', cantidad: 2, precio: 1500 },
+      ],
+      estado: 'RECIBIDO',
+      total: 28000,
+      senia: 5000,
+      fechaEntrega: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días desde ahora
+      notas: 'Entregar con caja de regalo',
+    },
+  });
+
+  console.log('\n=== Datos de prueba creados con éxito ===');
+  console.log('\n🔑 Credenciales de administrador:');
+  console.log('Email: admin@zapateria.com');
+  console.log('Contraseña: admin123');
+
+  console.log('\n👤 Credenciales de cliente:');
+  console.log('Email: cliente@ejemplo.com');
+  console.log('Contraseña: cliente123');
+
+  console.log('\n📦 Pedido de ejemplo creado con ID:', pedido.id);
+
+  // Mostrar información útil para desarrollo
+  console.log('\n🔗 URLs útiles:');
+  console.log(`- API: http://localhost:${process.env.PORT || 3000}`);
+  console.log('- Prisma Studio: npx prisma studio');
+  console.log('\n¡Listo para comenzar! 🚀');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ Error al ejecutar el seed:', e);
     process.exit(1);
   })
   .finally(async () => {
