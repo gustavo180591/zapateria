@@ -1,154 +1,119 @@
-# Sistema de Zapatería Online (Shoe-Order)
+Sistema de Zapatería (Shoe-Order)
+Descripción General
+Shoe-Order es una plataforma integral para la gestión de una zapatería basada en pedidos, que permite la venta, personalización y administración de calzado. El sistema está construido con una arquitectura moderna y escalable, diseñada para ofrecer una experiencia fluida tanto a clientes como a administradores.
+Estructura del Proyecto
+El proyecto sigue una arquitectura modular y está organizado de la siguiente manera:
+zapateria-online/
+├── frontend/                # Aplicación cliente en React
+├── backend/                 # API RESTful en Node.js/Express
+├── mobile-app/              # Aplicación móvil en React Native
+├── admin-dashboard/         # Panel de administración
+├── database/                # Scripts y esquemas de base de datos
+├── docs/                    # Documentación técnica y de usuario
+├── infrastructure/          # Configuración de despliegue e infraestructura
+├── tests/                   # Pruebas automatizadas
+└── scripts/                 # Scripts de automatización
 
-## Descripción General
-
-Shoe-Order es un sistema completo para la gestión de una zapatería basada en pedidos. Esta plataforma integra todas las funcionalidades necesarias para la venta, personalización, seguimiento y administración de pedidos de calzado, ofreciendo una experiencia fluida tanto para clientes como para administradores.
-
-## Características Principales
-
-### Para Clientes
-- **Catálogo de Productos**: Exploración de zapatos por categoría, estilo, marca, talla y precio.
-- **Personalización de Calzado**: Herramienta interactiva para personalizar colores, materiales y detalles.
-- **Gestión de Cuenta**: Registro, historial de pedidos y preferencias de usuario.
-- **Carrito de Compras**: Almacenamiento temporal de selecciones para finalizar compra.
-- **Proceso de Pago Seguro**: Múltiples métodos de pago y procesamiento seguro.
-- **Seguimiento de Pedidos**: Sistema en tiempo real para monitorear el estado de fabricación y envío.
-- **Reseñas y Valoraciones**: Posibilidad de calificar productos y compartir experiencias.
-
-### Para Administradores
-- **Panel de Control**: Estadísticas en tiempo real de ventas, pedidos y actividad del sitio.
-- **Gestión de Productos**: Herramientas para añadir, modificar y eliminar productos del catálogo.
-- **Gestión de Inventario**: Control de stock, alertas de niveles bajos y gestión de proveedores.
-- **Procesamiento de Pedidos**: Flujo de trabajo para procesar, fabricar y enviar pedidos.
-- **Gestión de Clientes**: Base de datos de usuarios con historial de compras y preferencias.
-- **Informes y Análisis**: Reportes detallados de ventas, tendencias y rendimiento.
-- **Gestión de Marketing**: Herramientas para campañas, descuentos y programas de fidelización.
-
-## Arquitectura Técnica
-
-### Frontend
-- **Tecnologías**: React.js, Redux, HTML5, CSS3, JavaScript ES6+
-- **Diseño Responsivo**: Adaptación a dispositivos móviles, tablets y escritorio
-- **Optimización de Rendimiento**: Lazy loading, code splitting y caching avanzado
-- **Accesibilidad**: Cumplimiento con estándares WCAG 2.1
-
-### Backend
-- **Framework**: Node.js con Express.js
-- **API RESTful**: Endpoints documentados con Swagger
-- **Autenticación**: JWT con renovación de tokens y OAuth 2.0
-- **Validación**: Middleware para validación de entradas y sanitización
-
-### Base de Datos
-- **Principal**: PostgreSQL para datos relacionales (usuarios, productos, pedidos)
-- **Caché**: Redis para almacenamiento en memoria y sesiones
-- **Indexación**: Elasticsearch para búsqueda avanzada de productos
-
-### Seguridad
-- **Cifrado**: SSL/TLS para todas las comunicaciones
-- **Protección de Datos**: Cumplimiento con GDPR y normativas locales
-- **Prevención**: Protección contra XSS, CSRF, inyección SQL y ataques DDoS
-- **Auditoría**: Registro detallado de acciones y cambios en el sistema
-
-### Infraestructura
-- **Hosting**: Despliegue en AWS con servicios EC2, S3, RDS y CloudFront
-- **Contenedores**: Docker para empaquetado y orquestación con Kubernetes
-- **CI/CD**: Integración continua con GitHub Actions
-- **Monitoreo**: Implementación de ELK Stack para logs y New Relic para rendimiento
-
-## Módulos Detallados
-
-### 1. Sistema de Usuarios
-- Registro con verificación por email
-- Autenticación con múltiples métodos (email/password, Google, Facebook)
-- Gestión de perfiles con preferencias de talla, estilo y notificaciones
-- Sistema de recuperación de contraseñas y bloqueo por intentos fallidos
-
-### 2. Catálogo de Productos
-- Estructura jerárquica de categorías y subcategorías
-- Sistema de filtrado avanzado por múltiples atributos
-- Visualización de productos con zoom y rotación 360°
-- Generación dinámica de URLs amigables para SEO
-
-### 3. Motor de Personalización
-- Interfaz interactiva para modificar partes del calzado
-- Visualización en tiempo real de cambios
-- Cálculo dinámico de precios según personalizaciones
-- Guardado de diseños para uso posterior
-
-### 4. Sistema de Pedidos
-- Validación de disponibilidad en tiempo real
-- Cálculo preciso de tiempos de fabricación y entrega
-- Notificaciones de cambios de estado por email/SMS
-- Integración con sistemas de logística y seguimiento
-
-### 5. Pasarela de Pagos
-- Soporte para tarjetas de crédito/débito
-- Integración con MercadoPago, PayPal, y transferencias bancarias
-- Tokenización de datos sensibles para mayor seguridad
-- Facturación electrónica automatizada
-
-### 6. Sistema de Inventario
-- Control en tiempo real de materiales y productos terminados
-- Predicción de demanda basada en históricos y tendencias
-- Alertas automatizadas para reposición
-- Integración con proveedores para pedidos automáticos
-
-### 7. CRM y Marketing
-- Segmentación de clientes por comportamiento y preferencias
-- Campañas personalizadas por email y notificaciones push
-- Programa de fidelización con puntos y descuentos
-- Análisis de efectividad de campañas y ROI
-
-### 8. Analítica y Reportes
-- Dashboard con KPIs clave del negocio
-- Informes exportables en múltiples formatos
-- Análisis de comportamiento de usuarios y embudos de conversión
-- Predicciones de ventas y tendencias
-
-## Flujos de Trabajo
-
-### Proceso de Compra
-1. El cliente navega por el catálogo o crea un diseño personalizado
-2. Añade productos al carrito y ajusta cantidades/tallas
-3. Procede al checkout ingresando dirección de envío
-4. Selecciona método de pago y confirma la orden
-5. Recibe confirmación por email con detalles y número de seguimiento
-
-### Fabricación y Envío
-1. El sistema notifica al taller sobre nuevos pedidos
-2. Se asignan los pedidos a artesanos según tipo y prioridad
-3. El estado del pedido se actualiza en cada fase de producción
-4. Control de calidad verifica el producto terminado
-5. Se empaca y envía con integración automática con transportistas
-6. Cliente recibe notificaciones de cambios de estado
-
-### Devoluciones
-1. Cliente solicita devolución desde su perfil
-2. Se genera etiqueta de devolución pre-pagada
-3. El sistema actualiza inventario al recibir el producto
-4. Proceso automatizado de reembolso según política
-
-## Instalación y Configuración
-
-### Requisitos Previos
-- Node.js (v14+)
-- PostgreSQL (v12+)
-- Redis (v6+)
-- Docker y Docker Compose
-- AWS CLI (para despliegue en producción)
-
-### Instalación Local
-```bash
+​
+Componentes Principales
+Frontend (/frontend)
+Interfaz de usuario web desarrollada en React.js con las siguientes características:
+Catálogo de Productos (/src/pages/Catalog.jsx): Visualización y filtrado avanzado de productos
+Detalle de Producto (/src/pages/Product.jsx): Visualización detallada con imágenes de alta resolución y opciones de personalización
+Herramienta de Personalización (/src/components/customization/ShoeDesigner.jsx): Editor interactivo para personalizar calzado
+Carrito de Compras (/src/components/checkout/Cart.jsx): Gestión de artículos seleccionados
+Proceso de Checkout (/src/pages/Checkout.jsx): Flujo de compra seguro y optimizado
+Seguimiento de Pedidos (/src/pages/OrderTracking.jsx): Interfaz para monitorear el estado de fabricación y envío
+El frontend utiliza Context API para la gestión de estado global (/src/context), servicios para comunicación con la API (/src/services) y componentes reutilizables (/src/components).
+Backend (/backend)
+Servidor API construido con Node.js y Express que gestiona la lógica de negocio:
+API RESTful (/src/api/routes): Endpoints para todos los recursos del sistema
+Controladores (/src/api/controllers): Manejo de solicitudes y respuestas HTTP
+Servicios (/src/services): Lógica de negocio encapsulada
+Modelos (/src/models): Definición de entidades y esquemas de datos
+Middlewares (/src/api/middlewares): Funciones intermedias para autenticación, validación y manejo de errores
+La estructura del backend sigue principios SOLID y está diseñada para escalar horizontalmente.
+Aplicación Móvil (/mobile-app)
+Versión nativa para dispositivos móviles desarrollada con React Native:
+Experiencia optimizada para pantallas pequeñas
+Funcionalidades principales disponibles en versión móvil
+Notificaciones push para actualizaciones de pedidos
+Panel de Administración (/admin-dashboard)
+Interfaz dedicada para gestión interna:
+Dashboard (/src/pages/Dashboard.jsx): Visualización de KPIs y métricas clave
+Gestión de Pedidos (/src/pages/Orders.jsx): Administración del ciclo de vida completo de pedidos
+Gestión de Productos (/src/pages/Products.jsx): CRUD de productos e inventario
+Gestión de Clientes (/src/pages/Customers.jsx): Administración de usuarios y preferencias
+Informes (/src/pages/Reports.jsx): Generación de reportes personalizables
+Base de Datos (/database)
+Scripts y esquemas para la persistencia de datos:
+Esquemas (/schemas): Definición de tablas y relaciones
+Migraciones (/migrations): Control de versiones de la estructura de datos
+Seeds (/seeds): Datos iniciales para desarrollo y pruebas
+Flujos Principales
+Proceso de Compra
+Exploración del Catálogo:
+El cliente navega por categorías y filtros implementados en frontend/src/pages/Catalog.jsx
+La búsqueda se procesa mediante backend/src/api/controllers/products.controller.js
+Personalización:
+El cliente puede personalizar el calzado usando frontend/src/components/customization/ShoeDesigner.jsx
+Las opciones y precios se gestionan en backend/src/services/product.service.js
+Gestión del Carrito:
+Los productos se agregan al carrito mediante frontend/src/context/CartContext.js
+El estado se sincroniza con backend/src/api/controllers/cart.controller.js
+Checkout:
+El proceso de pago se gestiona en frontend/src/pages/Checkout.jsx
+La validación y procesamiento ocurren en backend/src/services/payment.service.js
+Confirmación y Seguimiento:
+La orden se confirma a través de backend/src/api/controllers/orders.controller.js
+El cliente puede seguir su pedido mediante frontend/src/pages/OrderTracking.jsx
+Proceso de Administración
+Recepción de Pedidos:
+Los nuevos pedidos aparecen en admin-dashboard/src/pages/Orders.jsx
+Se procesan mediante backend/src/services/order.service.js
+Gestión de Inventario:
+El stock se actualiza automáticamente en admin-dashboard/src/pages/Inventory.jsx
+La lógica se implementa en backend/src/services/inventory.service.js
+Procesamiento de Pedidos:
+El estado de fabricación se actualiza en admin-dashboard/src/pages/Orders.jsx
+Las notificaciones se envían mediante backend/src/services/notification.service.js
+Tecnologías Utilizadas
+Frontend
+React.js con Hooks y Context API
+Redux para gestión de estado complejo
+Styled-components para estilos
+Axios para comunicación HTTP
+React Router para navegación
+Backend
+Node.js con Express
+PostgreSQL como base de datos principal
+Redis para caché y sesiones
+JWT para autenticación
+Joi para validación de datos
+Infraestructura
+Docker y Docker Compose para contenedores
+AWS (EC2, S3, RDS) para hosting
+GitHub Actions para CI/CD
+Nginx como proxy inverso
+ELK Stack para logging centralizado
+Instalación y Configuración
+Requisitos Previos
+Node.js v14.x o superior
+PostgreSQL v12.x o superior
+Redis v6.x o superior
+Docker y Docker Compose
+Git
+Configuración de Desarrollo
 # Clonar repositorio
-git clone https://github.com/gustavo180591/zapateria.git
-cd zapateria
-
-# Instalar dependencias
-npm install
+git clone <https://github.com/company/zapateria-online.git>
+cd zapateria-online
 
 # Configurar variables de entorno
 cp .env.example .env
-# Editar .env con configuraciones locales
+# Editar .env según sea necesario
+
+# Instalar dependencias
+npm run install:all
 
 # Iniciar servicios con Docker
 docker-compose up -d
@@ -156,8 +121,98 @@ docker-compose up -d
 # Ejecutar migraciones
 npm run migrate
 
-# Cargar datos iniciales
+# Cargar datos de prueba
 npm run seed
 
-# Iniciar aplicación en modo desarrollo
+# Iniciar todos los servicios en modo desarrollo
 npm run dev
+
+​
+Estructura de Variables de Entorno (.env)
+# Configuración General
+NODE_ENV=development
+PORT=3000
+
+# Base de Datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=zapateria
+DB_USER=postgres
+DB_PASSWORD=password
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRY=24h
+
+# Pasarelas de Pago
+STRIPE_API_KEY=your_stripe_key
+PAYPAL_CLIENT_ID=your_paypal_id
+PAYPAL_SECRET=your_paypal_secret
+
+# AWS (Producción)
+AWS_ACCESS_KEY=your_aws_key
+AWS_SECRET_KEY=your_aws_secret
+S3_BUCKET=zapateria-assets
+
+​
+Despliegue en Producción
+El despliegue en producción se realiza a través de los scripts ubicados en /infrastructure:
+# Configurar AWS CLI
+aws configure
+
+# Desplegar infraestructura
+cd infrastructure
+./deploy.sh production
+
+​
+El proceso de despliegue está automatizado mediante GitHub Actions, definido en .github/workflows/deploy.yml.
+Pruebas
+El proyecto incluye diferentes niveles de pruebas:
+# Ejecutar todas las pruebas
+npm test
+
+# Pruebas unitarias
+npm run test:unit
+
+# Pruebas de integración
+npm run test:integration
+
+# Pruebas e2e
+npm run test:e2e
+
+​
+Los tests se encuentran organizados en el directorio /tests siguiendo la misma estructura modular del proyecto.
+Desarrollo y Contribución
+Flujo de Trabajo Git
+Crear una rama desde develop con el formato: feature/nombre-funcionalidad
+Desarrollar y hacer commits siguiendo la convención de Conventional Commits
+Abrir un Pull Request a develop
+Después de revisión y aprobación, hacer merge
+Estándares de Código
+ESLint y Prettier configurados en .eslintrc y .prettierrc
+Hooks de pre-commit para asegurar calidad de código
+Documentación JSDoc requerida para funciones públicas
+Mantenimiento
+Logs y Monitoreo
+Logs centralizados con ELK Stack
+Monitoreo de rendimiento con New Relic
+Alertas configuradas para eventos críticos
+Backups
+Los backups de la base de datos se realizan automáticamente:
+Backups diarios incrementales
+Backups semanales completos
+Retención de 30 días
+Los scripts de backup se encuentran en /scripts/backup.sh.
+Soporte y Contacto
+Soporte Técnico: support@shoe-order.com
+Problemas: Abrir un issue en GitHub
+Mejoras: Enviar pull request siguiendo las directrices de contribución
+Licencia
+Este proyecto está licenciado bajo MIT License - ver archivo LICENSE para detalles.
+Desarrollado con ❤️ por el equipo Shoe-Order
+Versión: 1.0.0
+Última actualización: Julio 2025
