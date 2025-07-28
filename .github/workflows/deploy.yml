@@ -1,0 +1,90 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      version:
+        description: 'Version to deploy (leave empty for latest)'
+        required: false
+        type: string
+
+defaults:
+  run:
+    working-directory: ./
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'staging' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Login to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Set deployment version
+      id: set-version
+      run: |
+        VERSION="${{ github.event.inputs.version || github.sha }}"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Deploy Frontend
+      run: |
+        docker pull ghcr.io/${{ github.repository }}/frontend:${{ steps.set-version.outputs.version }}
+        docker tag ghcr.io/${{ github.repository }}/frontend:${{ steps.set-version.outputs.version }} \
+                  ghcr.io/${{ github.repository }}/frontend:${{ github.event.inputs.environment }}
+        docker push ghcr.io/${{ github.repository }}/frontend:${{ github.event.inputs.environment }}
+    
+    - name: Deploy Backend
+      run: |
+        docker pull ghcr.io/${{ github.repository }}/backend:${{ steps.set-version.outputs.version }}
+        docker tag ghcr.io/${{ github.repository }}/backend:${{ steps.set-version.outputs.version }} \
+                  ghcr.io/${{ github.repository }}/backend:${{ github.event.inputs.environment }}
+        docker push ghcr.io/${{ github.repository }}/backend:${{ github.event.inputs.environment }}
+    
+    - name: Update Kubernetes Deployments
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets[format('{0}_HOST', github.event.inputs.environment)] }}
+        username: ${{ secrets[format('{0}_SSH_USER', github.event.inputs.environment)] }}
+        key: ${{ secrets[format('{0}_SSH_KEY', github.event.inputs.environment)] }}
+        script: |
+          kubectl config use-context ${{ secrets[format('{0}_KUBE_CONTEXT', github.event.inputs.environment)] }}
+          
+          kubectl set image deployment/frontend \
+            frontend=ghcr.io/${{ github.repository }}/frontend:${{ github.event.inputs.environment }} \
+            --namespace=${{ github.event.inputs.environment }}
+          kubectl rollout status deployment/frontend --namespace=${{ github.event.inputs.environment }}
+          
+          kubectl set image deployment/backend \
+            backend=ghcr.io/${{ github.repository }}/backend:${{ github.event.inputs.environment }} \
+            --namespace=${{ github.event.inputs.environment }}
+          kubectl rollout status deployment/backend --namespace=${{ github.event.inputs.environment }}
+    
+    - name: Send deployment notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR: "#36a64f"
+        SLACK_TITLE: "🚀 ${{ github.event.inputs.environment }} Deployment Successful"
+        SLACK_MESSAGE: "Version ${{ steps.set-version.outputs.version }} has been deployed to ${{ github.event.inputs.environment }}"
+        SLACK_USERNAME: GitHub Actions
+        MSG_MINIMAL: true

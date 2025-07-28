@@ -1,0 +1,118 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+defaults:
+  run:
+    working-directory: ./
+
+jobs:
+  test-and-lint:
+    name: Test and Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    # Install dependencies
+    - name: Install root dependencies
+      run: npm ci
+    
+    # Frontend
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+      
+    - name: Lint frontend
+      working-directory: ./frontend
+      run: npm run lint
+      
+    - name: Test frontend
+      working-directory: ./frontend
+      run: npm test -- --coverage
+      
+    # Backend
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Lint backend
+      working-directory: ./backend
+      run: npm run lint
+      
+    - name: Test backend
+      working-directory: ./backend
+      run: npm test -- --coverage
+      env:
+        NODE_ENV: test
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: zapateria_test
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+    
+    # Mobile App
+    - name: Install mobile app dependencies
+      working-directory: ./mobile-app
+      run: npm ci
+      
+    - name: Lint mobile app
+      working-directory: ./mobile-app
+      run: npm run lint
+      
+    # Admin Dashboard
+    - name: Install admin dashboard dependencies
+      working-directory: ./admin-dashboard
+      run: npm ci
+      
+    - name: Lint admin dashboard
+      working-directory: ./admin-dashboard
+      run: npm run lint
+
+  build:
+    name: Build
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    # Build frontend
+    - name: Build frontend
+      working-directory: ./frontend
+      run: |
+        npm ci
+        npm run build
+      
+    # Build backend
+    - name: Build backend
+      working-directory: ./backend
+      run: |
+        npm ci
+        npm run build
+        
+    # Cache build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: |
+          frontend/build
+          backend/dist
+        retention-days: 5

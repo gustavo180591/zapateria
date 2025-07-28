@@ -1,0 +1,153 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Matches semantic versioning tags (e.g., v1.0.0)
+
+env:
+  DOCKER_IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        registry-url: 'https://registry.npmjs.org'
+    
+    - name: Configure Git
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+    
+    - name: Get version from tag
+      id: get-version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Update package versions
+      run: |
+        # Update root package.json if it exists
+        if [ -f "package.json" ]; then
+          npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
+        fi
+        
+        # Update frontend package.json
+        if [ -f "frontend/package.json" ]; then
+          cd frontend
+          npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
+          cd ..
+        fi
+        
+        # Update backend package.json
+        if [ -f "backend/package.json" ]; then
+          cd backend
+          npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
+          cd ..
+        fi
+        
+        # Update mobile-app package.json
+        if [ -f "mobile-app/package.json" ]; then
+          cd mobile-app
+          npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
+          cd ..
+        fi
+        
+        # Update admin-dashboard package.json
+        if [ -f "admin-dashboard/package.json" ]; then
+          cd admin-dashboard
+          npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
+          cd ..
+        fi
+    
+    - name: Generate Changelog
+      uses: mikepenz/release-changelog-builder-action@v3
+      id: changelog
+      with:
+        configuration: |
+          template: |
+            ## Changes
+            {{#each releases}}
+              {{#if @first}}
+                {{#each merges}}
+                  - {{message}} ({{id}})
+                {{/each}}
+                {{#each commits}}
+                  - {{subject}} ({{shorthash}})
+                {{/each}}
+              {{/if}}
+            {{/each}}
+          categories:
+            - title: '🚀 Features'
+              labels: ['feature', 'enhancement']
+            - title: '🐛 Bug Fixes'
+              labels: ['bug', 'bugfix', 'hotfix']
+            - title: '🧹 Maintenance'
+              labels: ['chore', 'refactor', 'maintenance']
+    
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.get-version.outputs.tag }}
+        release_name: Release ${{ steps.get-version.outputs.tag }}
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: false
+    
+    - name: Publish Packages
+      run: |
+        # Publish frontend package if it exists
+        if [ -f "frontend/package.json" ]; then
+          cd frontend
+          npm publish --access public
+          cd ..
+        fi
+        
+        # Publish backend package if it exists
+        if [ -f "backend/package.json" ]; then
+          cd backend
+          npm publish --access public
+          cd ..
+        }
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+    
+    - name: Update Release with Docker Images
+      run: |
+        # Get the release ID from the previous step
+        RELEASE_ID=${{ steps.create_release.outputs.id }}
+        
+        # Create release body with Docker image tags
+        BODY="${{ steps.changelog.outputs.changelog }}\n        \n## Docker Images\n\n- **Frontend:** \`${{ env.DOCKER_IMAGE }}/frontend:${{ steps.get-version.outputs.version }}\`\n- **Backend:** \`${{ env.DOCKER_IMAGE }}/backend:${{ steps.get-version.outputs.version }}\`"
+        
+        # Update the release with Docker image information
+        curl -X PATCH \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d "{\"body\":\"${BODY//$'\n'/\\n}\"}" \
+          "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
+    
+    - name: Notify Team
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_COLOR: "#36a64f"
+        SLACK_TITLE: "🚀 New Release: ${{ steps.get-version.outputs.tag }}"
+        SLACK_MESSAGE: "A new version of Zapateria has been released!"
+        SLACK_USERNAME: GitHub Actions
+        MSG_MINIMAL: true
