@@ -1,0 +1,38 @@
+# Development stage
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY admin-dashboard/package*.json ./admin-dashboard/
+
+# Install dependencies
+RUN npm install
+
+# Copy admin dashboard source code
+COPY . .
+
+# Set working directory to admin dashboard
+WORKDIR /app/admin-dashboard
+
+# Expose the admin dashboard port
+EXPOSE 3000
+
+# Start the admin dashboard in development mode
+CMD ["npm", "start"]
+
+# Production stage
+FROM development AS production
+
+# Build the application
+RUN npm run build
+
+# Install serve to run the production build
+RUN npm install -g serve
+
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Start the application
+CMD ["serve", "-s", "build", "-l", "3000"]

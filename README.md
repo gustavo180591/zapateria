@@ -1,5 +1,8 @@
 # 🚀 Shoe‑Order
 
+[![CI/CD](https://github.com/company/zapateria-online/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/company/zapateria-online/actions/workflows/ci-cd.yml)
+[![codecov](https://codecov.io/gh/company/zapateria-online/branch/main/graph/badge.svg?token=YOUR-TOKEN-HERE)](https://codecov.io/gh/company/zapateria-online)
+
 Plataforma integral de gestión de zapatería basada en pedidos
 
 > Venta, personalización y administración de calzado con arquitectura moderna y escalable.
@@ -8,10 +11,13 @@ Plataforma integral de gestión de zapatería basada en pedidos
 
 - [Descripción](#-descripción)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Instalación](#-instalación)
+- [Requisitos del Sistema](#-requisitos-del-sistema)
+- [Configuración del Entorno de Desarrollo](#-configuración-del-entorno-de-desarrollo)
 - [Uso](#-uso)
+- [Despliegue en Producción](#-despliegue-en-producción)
 - [Flujos Principales](#-flujos-principales)
 - [Tecnologías](#-tecnologías)
+- [Base de Datos](#-base-de-datos)
 - [Contribuir](#-contribuir)
 - [Licencia](#-licencia)
 - [Contacto](#-contacto)
@@ -25,6 +31,195 @@ Shoe‑Order es una solución completa para gestionar una zapatería online con:
 - Procesos de compra y seguimiento
 - Panel administrativo avanzado
 - Aplicación móvil para clientes
+
+## 🖥️ Requisitos del Sistema
+
+- Docker 20.10+
+- Docker Compose 1.29+
+- Node.js 18+
+- npm 9+ o yarn 1.22+
+- Git
+
+## 🛠️ Configuración del Entorno de Desarrollo
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/tu-usuario/zapateria.git
+cd zapateria
+```
+
+### 2. Configurar variables de entorno
+
+```bash
+cp .env.example .env
+# Editar el archivo .env según tus necesidades
+```
+
+### 3. Iniciar los servicios con Docker
+
+```bash
+docker-compose up -d
+```
+
+### 4. Instalar dependencias
+
+```bash
+# Instalar dependencias del backend
+docker-compose exec backend npm install
+
+# Instalar dependencias del frontend
+docker-compose exec frontend npm install
+
+# Instalar dependencias del panel de administración
+docker-compose exec admin npm install
+```
+
+### 5. Ejecutar migraciones de la base de datos
+
+```bash
+./scripts/db-migrate.sh run
+```
+
+### 6. Poblar la base de datos con datos de prueba (opcional)
+
+```bash
+docker-compose exec backend npm run seed:run
+```
+
+### 7. Iniciar los servicios en modo desarrollo
+
+```bash
+docker-compose up
+```
+
+## 🚀 Uso
+
+### Servicios disponibles
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:3001/graphql
+- **Admin Dashboard**: http://localhost:3002
+- **Base de datos**: PostgreSQL en localhost:5432
+- **Redis**: localhost:6379
+- **PgAdmin** (opcional): http://localhost:5050
+
+### Comandos útiles
+
+```bash
+# Ejecutar migraciones
+./scripts/db-migrate.sh run
+
+# Crear una nueva migración
+./scripts/db-migrate.sh create NombreDeLaMigracion
+
+# Revertir la última migración
+./scripts/db-migrate.sh revert
+
+# Ver estado de las migraciones
+./scripts/db-migrate.sh show
+
+# Ejecutar tests
+./scripts/test.sh
+
+# Formatear código
+./scripts/format.sh
+```
+
+## 🚀 Despliegue en Producción
+
+### 1. Configurar variables de entorno de producción
+
+```bash
+cp .env.example .env.prod
+# Editar el archivo .env.prod con las configuraciones de producción
+```
+
+### 2. Construir y desplegar los servicios
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+### 3. Ejecutar migraciones en producción
+
+```bash
+NODE_ENV=production ./scripts/db-migrate.sh run
+```
+
+### 4. Configurar Nginx y SSL (recomendado)
+
+Ver la configuración en `nginx/nginx.conf` y configurar tu dominio y certificados SSL.
+
+## 🗄️ Base de Datos
+
+### Diagrama ERD
+
+```mermaid
+erDiagram
+    USER ||--o{ ORDER : places
+    USER ||--o{ ADDRESS : has
+    ORDER ||--|{ ORDER_ITEM : contains
+    PRODUCT ||--o{ PRODUCT_VARIANT : has
+    PRODUCT_VARIANT ||--o{ INVENTORY : has
+    CATEGORY ||--o{ PRODUCT : contains
+    PRODUCT_VARIANT }|--|| COLOR : has
+    PRODUCT_VARIANT }|--|| SIZE : has
+    
+    USER {
+        string id PK
+        string email
+        string password
+        string firstName
+        string lastName
+        string role
+        boolean isActive
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    ORDER {
+        string id PK
+        string userId FK
+        string status
+        decimal total
+        string shippingAddress
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    PRODUCT {
+        string id PK
+        string name
+        string description
+        string categoryId FK
+        boolean isActive
+        datetime createdAt
+        datetime updatedAt
+    }
+```
+
+### Migraciones
+
+El proyecto utiliza TypeORM para la gestión de migraciones. Los archivos de migración se encuentran en `backend/src/migrations/`.
+
+#### Crear una nueva migración
+
+```bash
+./scripts/db-migrate.sh create NombreDeLaMigracion
+```
+
+#### Ejecutar migraciones
+
+```bash
+./scripts/db-migrate.sh run
+```
+
+#### Revertir la última migración
+
+```bash
+./scripts/db-migrate.sh revert
+```
 
 ## 🗂 Estructura del Proyecto
 

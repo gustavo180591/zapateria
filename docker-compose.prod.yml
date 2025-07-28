@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      target: production
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "3001:3001"
+    networks:
+      - zapateria-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      target: production
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=/api
+    networks:
+      - zapateria-network
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+      target: production
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=/admin-api
+    networks:
+      - zapateria-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/etc/letsencrypt
+      - ./www:/var/www/html
+    depends_on:
+      - backend
+      - frontend
+      - admin
+    networks:
+      - zapateria-network
+
+networks:
+  zapateria-network:
+    driver: bridge

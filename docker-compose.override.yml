@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      target: development
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/node_modules
+    environment:
+      - NODE_ENV=development
+      - DEBUG=zapateria:*,typeorm:*
+    ports:
+      - "9229:9229" # Node.js debug port
+    command: npm run dev
+
+  frontend:
+    build:
+      target: development
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3000:3000"
+      - "9228:9229" # Node.js debug port for frontend
+    command: npm start
+
+  admin:
+    build:
+      target: development
+    volumes:
+      - ./admin-dashboard:/app/admin-dashboard
+      - /app/admin-dashboard/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3002:3000"
+    command: npm start
+
+  db:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"

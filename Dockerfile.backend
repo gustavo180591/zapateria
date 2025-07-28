@@ -1,0 +1,32 @@
+# Development stage
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+
+# Install dependencies
+RUN npm install
+
+# Copy backend source code
+COPY . .
+
+# Set working directory to backend
+WORKDIR /app/backend
+
+# Expose the backend port
+EXPOSE 3001
+
+# Start the backend in development mode
+CMD ["npm", "run", "dev"]
+
+# Production stage
+FROM development AS production
+
+# Build the application
+RUN npm run build
+
+# Start the application
+CMD ["node", "dist/main.js"]
