@@ -1,10 +1,12 @@
 const http = require('http');
 
-// Simple controller
 class HelloController {
   getHello(req, res) {
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ message: '¡Hola desde el backend de Zapateria!' }));
+    // Only send the response once
+    if (!res.headersSent) {
+      res.end(JSON.stringify({ message: '¡Hola desde el backend de Zapateria!' }));
+    }
   }
 }
 
